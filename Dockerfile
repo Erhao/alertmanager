@@ -1,21 +1,19 @@
 ARG ARCH="amd64"
 ARG OS="linux"
 FROM quay.io/prometheus/busybox-${OS}-${ARCH}:latest
-LABEL maintainer="The Prometheus Authors <prometheus-developers@googlegroups.com>"
+LABEL maintainer="Moojing-DevOps <xinyu.zhang@moojing.com>"
 
-ARG ARCH="amd64"
-ARG OS="linux"
-COPY .build/${OS}-${ARCH}/amtool       /bin/amtool
-COPY .build/${OS}-${ARCH}/alertmanager /bin/alertmanager
-COPY examples/ha/alertmanager.yml      /etc/alertmanager/alertmanager.yml
+COPY amtool       /bin/amtool
+COPY alertmanager /bin/alertmanager
+COPY examples/ha/alertmanager.yml      /etc/alertmanager/alertmanager.ha.example.yml
 
-RUN mkdir -p /alertmanager && \
-    chown -R nobody:nobody etc/alertmanager /alertmanager
+RUN mkdir -p /alertmanager
 
-USER       nobody
+USER       root
 EXPOSE     9093
 VOLUME     [ "/alertmanager" ]
 WORKDIR    /alertmanager
 ENTRYPOINT [ "/bin/alertmanager" ]
 CMD        [ "--config.file=/etc/alertmanager/alertmanager.yml", \
-             "--storage.path=/alertmanager" ]
+             "--storage.path=/alertmanager", \
+             "--data.retention=1440h" ]
